@@ -2,9 +2,9 @@
 clasa care incapsuleaza o implementare de EFA
 '''
 import numpy as np
-import PCA.pca as pca
+import efa.pcaEFA as pca
 import scipy.stats as sts
-
+import Function as fun
 
 class EFA:
 

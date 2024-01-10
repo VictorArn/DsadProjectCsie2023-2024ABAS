@@ -1,12 +1,23 @@
 import numpy as np
 import pandas as pd
 import utils as utl
-import EFA.efa as efa
-import PCA.pca as pca
+import efa.EFA as efa
+import efa.pcaEFA as pca
 import factor_analyzer as fa
 import visual as vi
 from sklearn.preprocessing import StandardScaler
+#da
 
+tabel = pd.read_csv('dataIN/Infant_Mortality.csv', index_col=0)
+print(tabel)
+
+obsName = tabel.index.values
+varName = tabel.columns.values
+X = tabel.values
+
+# replace NAN cell
+
+X_df = pd.DataFrame(data=X, index=obsName, columns=varName)
 
 # compute Barlett sphericity test
 bartlett_sphericity = fa.calculate_bartlett_sphericity(x=X_df)
