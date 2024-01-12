@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
-import utils as utl
-import efa.EFA as efa
-import efa.pcaEFA as pca
+#import utils as utl
+import EFA.efa as efa
+import EFA.pcaEFA as pca
 import factor_analyzer as fa
 import visual as vi
+import Function as fun
 from sklearn.preprocessing import StandardScaler
 #da
 
@@ -13,11 +14,16 @@ print(tabel)
 
 obsName = tabel.index.values
 varName = tabel.columns.values
+m = len(varName)
+n = len(obsName)
 X = tabel.values
 
 # replace NAN cell
+Xstd = fun.standardize(X)
+print(Xstd)
+X_df = pd.DataFrame(data=Xstd, index=obsName, columns=varName)
+print(X_df)
 
-X_df = pd.DataFrame(data=X, index=obsName, columns=varName)
 
 # compute Barlett sphericity test
 bartlett_sphericity = fa.calculate_bartlett_sphericity(x=X_df)
@@ -36,6 +42,7 @@ if kmo[1] > 0.5:
 else:
     print('There are no common factors!')
     exit(-1)
+
 # create the correlogram of KMO indices
 vector = kmo[0]
 print(vector, type(vector))
@@ -43,6 +50,10 @@ matrix = vector[:, np.newaxis]
 print(matrix, type(matrix))
 matrix_df = pd.DataFrame(data=matrix, index=varName,
                          columns=['KMO indices'])
+
+#print kmo total
+print("KMO total: ", kmo[1])  #intre 0,60 - 0,69 Mediocra
+
 # save KMO indices into a CSV file
 matrix_df.to_csv('./dataOUT/KMO.csv')
 
@@ -99,6 +110,7 @@ vi.componentePrincipale(valoriProprii=eigenValuesFA[0],
 # compute the pricipal components for the initial X matrix
 modelPCA = pca.PCA(X)
 eigenValuesEFA = modelPCA.getValProp()
+
 factorLoadingsEFA = modelPCA.getRxc()  # these are the factor loadings
 components = ['C'+str(j+1) for j in range(X.shape[1])]
 factorLoadingsEFA_df = pd.DataFrame(data=factorLoadingsEFA,
@@ -110,6 +122,15 @@ factorLoadingsEFA_df.to_csv('./dataOUT/factorLoadingsEFA.csv')
 vi.corelograma(matrice=factorLoadingsEFA_df, titlu='Correlogram of PCA factor loadings')
 # vi.afisare()
 
+betha = modelPCA.getBetha()
+bethaTab = pd.DataFrame(data=betha, index=obsName, columns=['F' + str(j+1) for j in range(m)])
+print(bethaTab)
+vi.corelograma(bethaTab, titlu='Observation contribution on factor axis')
+
+calObs = modelPCA.getCalObs()
+calObsTab = pd.DataFrame(data=calObs, index=obsName, columns=['F' + str(j+1) for j in range(m)])
+print(calObsTab)
+vi.corelograma(calObsTab, titlu='Quality of observations representation on factor axis')
 
 # create the graphic of explained variance from PCA
 vi.componentePrincipale(valoriProprii=eigenValuesEFA,
